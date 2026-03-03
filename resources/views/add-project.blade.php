@@ -78,21 +78,20 @@
                         @endphp
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-3">Status</label>
-                            <div class="flex flex-wrap gap-3">
+                            <div class="flex flex-wrap gap-3" role="radiogroup" aria-label="Status">
                                 @foreach(\App\Models\Project::STATUS_OPTIONS as $option)
                                     @php
                                         $isSelected = $selectedStatus === $option;
                                         $bgColor = \App\Models\Project::STATUS_COLORS[$option];
-                                        $style = 'border-color: ' . $bgColor . '; ' . ($isSelected ? 'background-color: ' . $bgColor . '; color: ' . ($statusTextColors[$option] ?? '#374151') : 'background-color: transparent; color: #374151') . ';';
+                                        $textColor = $statusTextColors[$option] ?? '#374151';
                                     @endphp
-                                    <label class="relative flex items-center gap-2 cursor-pointer">
+                                    <label class="relative flex items-center gap-2 cursor-pointer rounded-full focus-within:ring-2 focus-within:ring-amber-500 focus-within:ring-offset-2 focus-within:outline-none"
+                                           style="--status-bg: {{ $bgColor }}; --status-text: {{ $textColor }};">
                                         <input type="radio" name="status" value="{{ $option }}"
                                                {{ $isSelected ? 'checked' : '' }}
-                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                        <span class="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 transition-all text-sm font-medium select-none pointer-events-none"
-                                              style="{{ $style }}">
-                                            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                                                  style="background-color: {{ $bgColor }}"></span>
+                                               class="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <span class="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 transition-all duration-150 text-sm font-medium select-none pointer-events-none border-[var(--status-bg)] bg-transparent text-gray-700 peer-checked:bg-[var(--status-bg)] peer-checked:text-[var(--status-text)] peer-checked:border-[var(--status-bg)] active:scale-[0.98]">
+                                            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[var(--status-bg)]"></span>
                                             {{ $option }}
                                         </span>
                                     </label>

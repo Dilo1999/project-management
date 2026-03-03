@@ -1,13 +1,8 @@
 <header class="bg-white/95 backdrop-blur-sm border-b border-slate-200/80 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
         {{-- Logo --}}
-        <a href="{{ route('home') }}" class="flex items-center gap-2.5 group shrink-0">
-            <div class="h-9 w-9 rounded-lg bg-slate-900 flex items-center justify-center group-hover:bg-slate-800 transition-colors">
-                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-                </svg>
-            </div>
-            <span class="font-semibold text-slate-800 tracking-tight hidden sm:inline">LITUS</span>
+        <a href="{{ route('home') }}" class="flex items-center gap-2.5 group shrink-0 -ml-3">
+            <img src="{{ asset('images/logo/Logo---H.jpg.jpeg') }}" alt="Logo" class="max-h-12 w-auto object-contain group-hover:opacity-90 transition-opacity shrink-0" />
         </a>
 
         {{-- Right section: Messages + User --}}
