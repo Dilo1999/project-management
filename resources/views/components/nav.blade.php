@@ -1,7 +1,27 @@
-<aside class="w-64 shrink-0 h-full bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-slate-100 border-r border-slate-800/50 overflow-hidden">
-    <nav class="h-full flex flex-col px-4 py-6">
-        {{-- Nav section label --}}
-        <p class="text-[11px] font-medium uppercase tracking-wider text-slate-500 px-3 mb-3">Menu</p>
+<div class="md:relative">
+    {{-- Mobile overlay backdrop --}}
+    <div class="fixed inset-0 bg-black/40 z-30 opacity-0 pointer-events-none transition-opacity duration-200 md:hidden"
+         data-sidebar-backdrop></div>
+
+    <aside class="fixed inset-y-0 left-0 z-40 w-64 shrink-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-slate-100 border-r border-slate-800/50 overflow-hidden transform -translate-x-full transition-transform duration-200 md:static md:inset-auto md:h-full md:translate-x-0"
+           data-sidebar>
+        <nav class="h-full flex flex-col px-4 py-6">
+            {{-- Header row (mobile only) --}}
+            <div class="flex items-center justify-between mb-4 md:hidden">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Menu</p>
+                <button type="button"
+                        class="inline-flex items-center justify-center rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                        aria-label="Close navigation menu"
+                        data-sidebar-close>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Nav section label --}}
+            <p class="hidden md:block text-[11px] font-medium uppercase tracking-wider text-slate-500 px-3 mb-3">Menu</p>
 
         {{-- Main nav links --}}
         <div class="space-y-1 font-medium">
@@ -58,18 +78,19 @@
         {{-- Spacer --}}
         <div class="flex-1 min-h-[24px]"></div>
 
-        {{-- Logout --}}
-        <div class="pt-4 border-t border-slate-800">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group">
-                    <svg class="w-5 h-5 shrink-0 text-slate-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    <span>Logout</span>
-                </button>
-            </form>
-        </div>
-    </nav>
-</aside>
+            {{-- Logout --}}
+            <div class="pt-4 border-t border-slate-800">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            class="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group">
+                        <svg class="w-5 h-5 shrink-0 text-slate-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </aside>
+</div>

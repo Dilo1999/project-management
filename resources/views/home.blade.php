@@ -144,6 +144,7 @@
             if (!chartData || chartData.length === 0) return;
 
             const uniqueRows = [...new Set(chartData.map(d => d.x))].length;
+            const isMobile = window.matchMedia('(max-width: 640px)').matches;
             const opts = {
                 series: [{ name: 'Timeline', data: chartData }],
                 chart: {
@@ -166,12 +167,21 @@
                     type: 'datetime',
                     labels: { datetimeFormatter: { day: 'MMM d', month: 'MMM d', year: 'MMM yyyy' } }
                 },
-                yaxis: { labels: { style: { fontWeight: 600, colors: '#374151' } } },
+                yaxis: {
+                    labels: {
+                        style: { fontWeight: 600, colors: '#374151' },
+                        offsetX: isMobile ? -8 : 0
+                    }
+                },
                 grid: {
                     borderColor: '#f0f0f0',
                     strokeDashArray: 3,
                     xaxis: { lines: { show: true } },
-                    yaxis: { lines: { show: false } }
+                    yaxis: { lines: { show: false } },
+                    padding: {
+                        left: isMobile ? -8 : 0,
+                        right: 0
+                    }
                 },
                 tooltip: {
                     custom: function(_opts) {
