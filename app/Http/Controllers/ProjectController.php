@@ -15,7 +15,10 @@ class ProjectController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $projects = Project::with('statusChanges')->orderBy('assigned_to')->orderBy('start_date')->get();
+        $projects = Project::with(['statusChanges', 'tickets.assignedBy'])
+            ->orderBy('assigned_to')
+            ->orderBy('start_date')
+            ->get();
         $projectsGrouped = $projects->groupBy('assigned_to');
 
         $chartDataByAssignee = $this->buildGanttChartDataByAssignee($projectsGrouped);
@@ -26,7 +29,7 @@ class ProjectController extends Controller
     public function myProjects()
     {
         $user = Auth::user();
-        $projects = Project::with('statusChanges')
+        $projects = Project::with(['statusChanges', 'tickets.assignedBy'])
             ->where('assigned_to', $user->name)
             ->orderBy('start_date')
             ->get();
@@ -44,9 +47,18 @@ class ProjectController extends Controller
             $data = [];
 
             foreach ($projects as $project) {
-                $startTs = Carbon::parse($project->start_date)->startOfDay()->timestamp * 1000;
+                $startTs = Carbon::parse($project->start_date)->timestamp * 1000;
                 $endTs = Carbon::parse($project->end_date)->endOfDay()->timestamp * 1000;
                 $changes = $project->statusChanges;
+
+                // For ticket-related segments, attach the latest ticket info (from & description).
+                $latestTicket = $project->tickets
+                    ? $project->tickets->loadMissing('assignedBy')
+                        ->sortByDesc('created_at')
+                        ->first()
+                    : null;
+                $ticketFrom = $latestTicket && $latestTicket->assignedBy ? $latestTicket->assignedBy->name : null;
+                $ticketDescription = $latestTicket ? $latestTicket->description : null;
 
                 if ($changes->isEmpty()) {
                     $data[] = [
@@ -54,13 +66,15 @@ class ProjectController extends Controller
                         'y' => [$startTs, $endTs],
                         'fillColor' => Project::STATUS_COLORS[$project->status] ?? '#D3D3D3',
                         'status' => $project->status,
+                        'ticketFrom' => $project->status === 'Ticked Task' ? $ticketFrom : null,
+                        'ticketDescription' => $project->status === 'Ticked Task' ? $ticketDescription : null,
                     ];
                     continue;
                 }
 
                 foreach ($changes as $i => $change) {
-                    $changedTs = Carbon::parse($change->changed_at)->startOfDay()->timestamp * 1000;
-                    $segStart = $i === 0 ? $startTs : Carbon::parse($changes[$i - 1]->changed_at)->startOfDay()->timestamp * 1000;
+                    $changedTs = Carbon::parse($change->changed_at)->timestamp * 1000;
+                    $segStart = $i === 0 ? $startTs : Carbon::parse($changes[$i - 1]->changed_at)->timestamp * 1000;
                     $segEnd = $changedTs;
 
                     if ($segStart >= $endTs || $segEnd <= $startTs) {
@@ -78,11 +92,13 @@ class ProjectController extends Controller
                         'y' => [$segStart, $segEnd],
                         'fillColor' => $color,
                         'status' => $change->from_status,
+                        'ticketFrom' => $change->from_status === 'Ticked Task' ? $ticketFrom : null,
+                        'ticketDescription' => $change->from_status === 'Ticked Task' ? $ticketDescription : null,
                     ];
                 }
 
                 $lastChange = $changes->last();
-                $lastChangedTs = Carbon::parse($lastChange->changed_at)->startOfDay()->timestamp * 1000;
+                $lastChangedTs = Carbon::parse($lastChange->changed_at)->timestamp * 1000;
                 $segmentStart = max($lastChangedTs, $startTs);
                 if ($segmentStart < $endTs) {
                     $statusColor = Project::STATUS_COLORS[$lastChange->to_status] ?? '#D3D3D3';
@@ -91,6 +107,8 @@ class ProjectController extends Controller
                         'y' => [$segmentStart, $endTs],
                         'fillColor' => $statusColor,
                         'status' => $lastChange->to_status,
+                        'ticketFrom' => $lastChange->to_status === 'Ticked Task' ? $ticketFrom : null,
+                        'ticketDescription' => $lastChange->to_status === 'Ticked Task' ? $ticketDescription : null,
                     ];
                 }
             }
@@ -112,14 +130,24 @@ class ProjectController extends Controller
             return;
         }
 
-        $entryDate = Carbon::parse($entryChange->changed_at)->startOfDay();
-        $exitDate = Carbon::now()->startOfDay();
-        $daysInWaiting = $entryDate->diffInDays($exitDate);
+        $entryDate = Carbon::parse($entryChange->changed_at);
+        $exitDate = Carbon::now();
+        $secondsInWaiting = $entryDate->diffInSeconds($exitDate);
 
-        if ($daysInWaiting > 0) {
-            $project->end_date = Carbon::parse($project->end_date)->addDays($daysInWaiting);
-            $project->save();
+        // Add full duration (seconds) into the project's pending buffer.
+        $pending = (int) ($project->pending_extension_seconds ?? 0);
+        $pending += $secondsInWaiting;
+
+        // Convert complete 24h chunks into whole days, keep remainder in the buffer.
+        $daysToAdd = intdiv($pending, 24 * 60 * 60);
+        $remainder = $pending % (24 * 60 * 60);
+
+        if ($daysToAdd >= 1) {
+            $project->end_date = Carbon::parse($project->end_date)->addDays($daysToAdd);
         }
+
+        $project->pending_extension_seconds = $remainder;
+        $project->save();
     }
 
     private function addDaysInOnToProjectEndDate(Project $projectToExtend, iterable $projectsBeingPaused): void
@@ -140,7 +168,19 @@ class ProjectController extends Controller
         }
 
         if ($totalSeconds > 0) {
-            $projectToExtend->end_date = Carbon::parse($projectToExtend->end_date)->addSeconds($totalSeconds);
+            // Aggregate exact duration spent "On" into the target project's buffer.
+            $pending = (int) ($projectToExtend->pending_extension_seconds ?? 0);
+            $pending += $totalSeconds;
+
+            // Convert complete 24h chunks into days, keep remainder seconds.
+            $daysToAdd = intdiv($pending, 24 * 60 * 60);
+            $remainder = $pending % (24 * 60 * 60);
+
+            if ($daysToAdd >= 1) {
+                $projectToExtend->end_date = Carbon::parse($projectToExtend->end_date)->addDays($daysToAdd);
+            }
+
+            $projectToExtend->pending_extension_seconds = $remainder;
             $projectToExtend->save();
         }
     }
@@ -156,7 +196,7 @@ class ProjectController extends Controller
             ->where('id', '!=', $project->id)
             ->get();
 
-        $changeDate = Carbon::now()->startOfDay();
+        $changeDate = Carbon::now();
 
         $this->addDaysInOnToProjectEndDate($project, $otherOnProjects);
 
@@ -285,7 +325,7 @@ class ProjectController extends Controller
                 ->where('id', '!=', $project->id)
                 ->get();
 
-            $changeDate = Carbon::now()->startOfDay();
+            $changeDate = Carbon::now();
 
             $this->addDaysInOnToProjectEndDate($project, $otherOnProjects);
 
@@ -323,7 +363,7 @@ class ProjectController extends Controller
                 $this->addWaitingForApprovalDaysToEndDate($project);
             }
 
-            $changeDate = Carbon::now()->startOfDay();
+            $changeDate = Carbon::now();
             ProjectStatusChange::create([
                 'project_id' => $project->id,
                 'from_status' => $oldStatus,

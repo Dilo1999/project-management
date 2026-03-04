@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Project extends Model
 {
@@ -35,6 +36,7 @@ class Project extends Model
         'assigned_to',
         'start_date',
         'end_date',
+        'pending_extension_seconds',
         'status',
         'status_changed_at',
         'status_before_pause',
@@ -46,6 +48,7 @@ class Project extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'pending_extension_seconds' => 'integer',
             'status_changed_at' => 'datetime',
         ];
     }
@@ -58,5 +61,10 @@ class Project extends Model
     public function statusChanges(): HasMany
     {
         return $this->hasMany(ProjectStatusChange::class)->orderBy('changed_at');
+    }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

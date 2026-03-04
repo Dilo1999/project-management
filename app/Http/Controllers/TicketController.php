@@ -58,15 +58,17 @@ class TicketController extends Controller
             ->first();
 
         if ($project) {
+            $changeDate = Carbon::now();
+
             ProjectStatusChange::create([
                 'project_id' => $project->id,
                 'from_status' => 'On',
                 'to_status' => 'Ticked Task',
-                'changed_at' => Carbon::now()->startOfDay(),
+                'changed_at' => $changeDate,
             ]);
             $project->update([
                 'status' => 'Ticked Task',
-                'status_changed_at' => Carbon::now()->startOfDay(),
+                'status_changed_at' => $changeDate,
                 'status_before_pause' => 'On',
             ]);
             $ticket->update(['status' => 'accepted', 'project_id' => $project->id]);
@@ -114,28 +116,45 @@ class TicketController extends Controller
                     ->first();
 
                 $endDateUpdate = null;
+                $pendingSecondsUpdate = null;
                 if ($entryChange) {
                     $entryAt = Carbon::parse($entryChange->changed_at);
                     $exitAt = Carbon::now();
                     $durationSeconds = $entryAt->diffInSeconds($exitAt);
                     if ($durationSeconds > 0) {
-                        $endDateUpdate = Carbon::parse($project->end_date)->addSeconds($durationSeconds);
+                        // Accumulate emergency task duration into the project's pending buffer.
+                        $pending = (int) ($project->pending_extension_seconds ?? 0);
+                        $pending += $durationSeconds;
+
+                        // Convert complete 24h chunks into days, keep remainder seconds.
+                        $daysToAdd = intdiv($pending, 24 * 60 * 60);
+                        $remainder = $pending % (24 * 60 * 60);
+
+                        if ($daysToAdd >= 1) {
+                            $endDateUpdate = Carbon::parse($project->end_date)->addDays($daysToAdd);
+                        }
+                        $pendingSecondsUpdate = $remainder;
                     }
                 }
+
+                $changeDate = Carbon::now();
 
                 ProjectStatusChange::create([
                     'project_id' => $project->id,
                     'from_status' => 'Ticked Task',
                     'to_status' => 'On',
-                    'changed_at' => Carbon::now()->startOfDay(),
+                    'changed_at' => $changeDate,
                 ]);
                 $updateData = [
                     'status' => 'On',
-                    'status_changed_at' => Carbon::now()->startOfDay(),
+                    'status_changed_at' => $changeDate,
                     'status_before_pause' => null,
                 ];
                 if ($endDateUpdate) {
                     $updateData['end_date'] = $endDateUpdate;
+                }
+                if (!is_null($pendingSecondsUpdate)) {
+                    $updateData['pending_extension_seconds'] = $pendingSecondsUpdate;
                 }
                 $project->update($updateData);
             }

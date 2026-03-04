@@ -14,7 +14,7 @@
             </button>
 
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 group shrink-0 -ml-1 sm:-ml-3">
-                <img src="{{ asset('images/logo/Logo---H.jpg.jpeg') }}" alt="Logo" class="max-h-10 sm:max-h-12 w-auto object-contain group-hover:opacity-90 transition-opacity shrink-0" />
+                <img src="{{ asset('images/logo/Logo---H.jpg.jpeg') }}" alt="Logo" class="max-h-14 sm:max-h-16 w-auto object-contain group-hover:opacity-90 transition-opacity shrink-0" />
             </a>
         </div>
 
