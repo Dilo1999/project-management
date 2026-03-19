@@ -42,6 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('super_admin')->group(function () {
         Route::get('/users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/approve', [\App\Http\Controllers\UserController::class, 'approve'])->name('users.approve');
+        Route::get('/reports/user-work', [\App\Http\Controllers\ReportController::class, 'userWork'])->name('reports.user-work');
+        Route::get('/reports/user-work/{user}', [\App\Http\Controllers\ReportController::class, 'userWorkShow'])->name('reports.user-work.show');
     });
     Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
     Route::get('/chat/messages', [\App\Http\Controllers\ChatController::class, 'messages'])->name('chat.messages');
