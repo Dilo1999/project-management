@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
@@ -38,5 +40,34 @@ class UserController extends Controller
         $user->update(['approved_at' => now()]);
 
         return redirect()->route('users.index')->with('success', "{$user->name}'s account has been approved. They can now log in.");
+    }
+
+    /**
+     * Remove a user from the system (super admin only).
+     */
+    public function destroy(User $user)
+    {
+        if ($user->id === Auth::id()) {
+            return redirect()->route('users.index')->with('error', 'You cannot remove your own account.');
+        }
+
+        if ($user->isSuperAdmin()) {
+            $otherSuperAdmins = User::where('role', User::ROLE_SUPER_ADMIN)
+                ->where('id', '!=', $user->id)
+                ->count();
+            if ($otherSuperAdmins === 0) {
+                return redirect()->route('users.index')->with('error', 'Cannot remove the last super admin.');
+            }
+        }
+
+        $name = $user->name;
+
+        if (Schema::hasTable('chat_messages')) {
+            ChatMessage::where('user_id', $user->id)->delete();
+        }
+
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', "User \"{$name}\" has been removed.");
     }
 }

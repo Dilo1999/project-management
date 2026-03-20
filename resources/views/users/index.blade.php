@@ -28,6 +28,12 @@
                     </div>
                 @endif
 
+                @if(session('error'))
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <x-users.pending-requests :pending-users="$pendingUsers" />
 
                 <x-users.stats-grid

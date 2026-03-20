@@ -11,11 +11,22 @@
             <p class="text-xs text-slate-400 mt-0.5">Requested {{ $user->created_at->diffForHumans() }}</p>
         </div>
     </div>
-    <form action="{{ route('users.approve', $user) }}" method="POST" class="shrink-0">
-        @csrf
-        <button type="submit"
-                class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors">
-            Approve
-        </button>
-    </form>
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+        <form action="{{ route('users.approve', $user) }}" method="POST">
+            @csrf
+            <button type="submit"
+                    class="w-full sm:w-auto px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors">
+                Approve
+            </button>
+        </form>
+        <form action="{{ route('users.destroy', $user) }}" method="POST"
+              onsubmit="return confirm('Reject and remove this account request for {{ e($user->name) }}?');">
+            @csrf
+            @method('DELETE')
+            <button type="submit"
+                    class="w-full sm:w-auto px-4 py-2 text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-sm font-medium transition-colors">
+                Remove
+            </button>
+        </form>
+    </div>
 </div>

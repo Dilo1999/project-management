@@ -41,6 +41,8 @@ class LoginController extends Controller
             }
 
             $request->session()->regenerate();
+            $request->session()->put(\App\Http\Middleware\EnforceIdleTimeout::SESSION_KEY, time());
+
             return redirect()->intended(route('home'));
         }
 

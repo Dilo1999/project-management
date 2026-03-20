@@ -1,7 +1,11 @@
 @props(['user'])
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-slate-200/80 transition-all duration-200 group">
-    <div class="flex items-start gap-4">
+@php
+    $isSelf = auth()->id() === $user->id;
+@endphp
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-slate-200/80 transition-all duration-200 group flex flex-col">
+    <div class="flex items-start gap-4 flex-1">
         <div class="h-12 w-12 rounded-full flex items-center justify-center font-semibold text-sm shrink-0 {{ $user->role === 'super_admin' ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md' : 'bg-slate-100 text-slate-600' }}">
             {{ strtoupper(substr($user->name, 0, 2)) }}
         </div>
@@ -13,4 +17,15 @@
             </span>
         </div>
     </div>
+    @unless($isSelf)
+        <form action="{{ route('users.destroy', $user) }}" method="POST" class="mt-4 pt-4 border-t border-gray-100"
+              onsubmit="return confirm('Remove {{ e($user->name) }}? Their projects and tickets linked to them will be deleted.');">
+            @csrf
+            @method('DELETE')
+            <button type="submit"
+                    class="w-full px-3 py-2 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors">
+                Remove user
+            </button>
+        </form>
+    @endunless
 </div>

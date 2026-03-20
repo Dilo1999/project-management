@@ -19,6 +19,12 @@
         <h2 class="text-[#333] text-[1.3rem] font-semibold mb-1">Web Development</h2>
         <p class="text-[0.9rem] text-[#666] mb-6">Made easy!</p>
 
+        @if (session('idle_message'))
+            <div class="mb-4 p-3 rounded-2xl text-amber-800 text-sm shadow-neu-inset bg-amber-50 border border-amber-200/80">
+                {{ session('idle_message') }}
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="mb-4 p-3 rounded-2xl text-red-600 text-sm shadow-neu-inset bg-[#e0e5ec]">
                 {{ $errors->first() }}
