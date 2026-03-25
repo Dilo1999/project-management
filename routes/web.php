@@ -25,23 +25,29 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'idle_timeout'])->group(function () {
-    Route::get('/home', [\App\Http\Controllers\ProjectController::class, 'index'])->name('home');
-    Route::get('/projects/my-projects', [\App\Http\Controllers\ProjectController::class, 'myProjects'])->name('projects.my');
-    Route::get('/projects/add', [\App\Http\Controllers\ProjectController::class, 'create'])->name('projects.add');
-    Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
-    Route::get('/projects/{project}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
-    Route::put('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
-    Route::delete('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
-    Route::patch('/projects/{project}/status', [\App\Http\Controllers\ProjectController::class, 'updateStatus'])->name('projects.updateStatus');
     Route::get('/book-ticket', [\App\Http\Controllers\TicketController::class, 'create'])->name('book-ticket');
     Route::post('/book-ticket', [\App\Http\Controllers\TicketController::class, 'store'])->name('tickets.store');
-    Route::get('/my-messages', [\App\Http\Controllers\TicketController::class, 'myMessages'])->name('my-messages');
-    Route::post('/tickets/{ticket}/accept', [\App\Http\Controllers\TicketController::class, 'accept'])->name('tickets.accept');
-    Route::post('/tickets/{ticket}/reject', [\App\Http\Controllers\TicketController::class, 'reject'])->name('tickets.reject');
-    Route::post('/tickets/{ticket}/done', [\App\Http\Controllers\TicketController::class, 'markDone'])->name('tickets.markDone');
+
+    Route::middleware('not_normal')->group(function () {
+        Route::get('/home', [\App\Http\Controllers\ProjectController::class, 'index'])->name('home');
+        Route::get('/projects/my-projects', [\App\Http\Controllers\ProjectController::class, 'myProjects'])->name('projects.my');
+        Route::get('/projects/add', [\App\Http\Controllers\ProjectController::class, 'create'])->name('projects.add');
+        Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
+        Route::get('/projects/{project}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
+        Route::put('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
+        Route::delete('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
+        Route::patch('/projects/{project}/status', [\App\Http\Controllers\ProjectController::class, 'updateStatus'])->name('projects.updateStatus');
+
+        Route::get('/my-messages', [\App\Http\Controllers\TicketController::class, 'myMessages'])->name('my-messages');
+        Route::post('/tickets/{ticket}/accept', [\App\Http\Controllers\TicketController::class, 'accept'])->name('tickets.accept');
+        Route::post('/tickets/{ticket}/reject', [\App\Http\Controllers\TicketController::class, 'reject'])->name('tickets.reject');
+        Route::post('/tickets/{ticket}/done', [\App\Http\Controllers\TicketController::class, 'markDone'])->name('tickets.markDone');
+    });
+
     Route::middleware('super_admin')->group(function () {
         Route::get('/users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/approve', [\App\Http\Controllers\UserController::class, 'approve'])->name('users.approve');
+        Route::patch('/users/{user}/role', [\App\Http\Controllers\UserController::class, 'updateRole'])->name('users.role');
         Route::delete('/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
         Route::get('/reports/user-work', [\App\Http\Controllers\ReportController::class, 'userWork'])->name('reports.user-work');
         Route::get('/reports/user-work/{user}', [\App\Http\Controllers\ReportController::class, 'userWorkShow'])->name('reports.user-work.show');

@@ -33,7 +33,7 @@ class RegisterController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
-            'role' => User::ROLE_USER,
+            'role' => User::ROLE_NORMAL,
             'approved_at' => null,
         ]);
 

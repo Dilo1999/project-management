@@ -43,6 +43,10 @@ class LoginController extends Controller
             $request->session()->regenerate();
             $request->session()->put(\App\Http\Middleware\EnforceIdleTimeout::SESSION_KEY, time());
 
+            if ($user->isNormal()) {
+                return redirect()->intended(route('book-ticket'));
+            }
+
             return redirect()->intended(route('home'));
         }
 

@@ -37,9 +37,31 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('success', 'User is already approved.');
         }
 
-        $user->update(['approved_at' => now()]);
+        $validated = $request->validate([
+            'role' => ['required', 'string', 'in:'.implode(',', [User::ROLE_NORMAL, User::ROLE_DEVELOPER, User::ROLE_DESIGNER])],
+        ]);
+
+        $user->update([
+            'role' => $validated['role'],
+            'approved_at' => now(),
+        ]);
 
         return redirect()->route('users.index')->with('success', "{$user->name}'s account has been approved. They can now log in.");
+    }
+
+    public function updateRole(Request $request, User $user)
+    {
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('users.index')->with('error', 'Super admin role cannot be changed here.');
+        }
+
+        $validated = $request->validate([
+            'role' => ['required', 'string', 'in:'.implode(',', [User::ROLE_NORMAL, User::ROLE_DEVELOPER, User::ROLE_DESIGNER])],
+        ]);
+
+        $user->update(['role' => $validated['role']]);
+
+        return redirect()->route('users.index')->with('success', "{$user->name}'s role has been updated.");
     }
 
     /**

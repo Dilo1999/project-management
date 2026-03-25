@@ -26,8 +26,17 @@ class User extends Authenticatable
         'approved_at',
     ];
 
-    public const ROLE_USER = 'user';
+    public const ROLE_NORMAL = 'normal';
+    public const ROLE_DEVELOPER = 'developer';
+    public const ROLE_DESIGNER = 'designer';
     public const ROLE_SUPER_ADMIN = 'super_admin';
+
+    public const ROLES = [
+        self::ROLE_NORMAL,
+        self::ROLE_DEVELOPER,
+        self::ROLE_DESIGNER,
+        self::ROLE_SUPER_ADMIN,
+    ];
 
     /**
      * The attributes that should be cast.
@@ -46,6 +55,16 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->role === self::ROLE_SUPER_ADMIN;
+    }
+
+    public function isNormal(): bool
+    {
+        return $this->role === self::ROLE_NORMAL;
+    }
+
+    public static function isAssignableRole(string $role): bool
+    {
+        return in_array($role, [self::ROLE_NORMAL, self::ROLE_DEVELOPER, self::ROLE_DESIGNER], true);
     }
 
     /**

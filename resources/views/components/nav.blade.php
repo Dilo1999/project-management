@@ -23,8 +23,13 @@
             {{-- Nav section label --}}
             <p class="hidden md:block text-[11px] font-medium uppercase tracking-wider text-slate-500 px-3 mb-3">Menu</p>
 
+        @php
+            $isNormal = auth()->user()?->role === 'normal' || auth()->user()?->role === 'user';
+        @endphp
+
         {{-- Main nav links --}}
         <div class="space-y-1 font-medium">
+            @unless($isNormal)
             <a href="{{ route('home') }}"
                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-all duration-200 {{ request()->routeIs('home') ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800/60 hover:text-slate-100' }}">
                 <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('home') ? 'text-amber-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,6 +51,7 @@
                 </svg>
                 <span>Add Project</span>
             </a>
+            @endunless
             <a href="{{ route('book-ticket') }}"
                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-all duration-200 {{ request()->routeIs('book-ticket') ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800/60 hover:text-slate-100' }}">
                 <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('book-ticket') ? 'text-amber-400' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
