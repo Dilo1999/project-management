@@ -218,7 +218,10 @@ class ProjectController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $users = User::orderBy('name')->get(['id', 'name']);
+        $users = User::whereIn('role', [User::ROLE_DEVELOPER, User::ROLE_DESIGNER, User::ROLE_SUPER_ADMIN])
+            ->whereNotNull('approved_at')
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         return view('add-project', compact('user', 'users'));
     }
@@ -261,7 +264,10 @@ class ProjectController extends Controller
         }
 
         $user = Auth::user();
-        $users = User::orderBy('name')->get(['id', 'name']);
+        $users = User::whereIn('role', [User::ROLE_DEVELOPER, User::ROLE_DESIGNER, User::ROLE_SUPER_ADMIN])
+            ->whereNotNull('approved_at')
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         return view('edit-project', compact('user', 'users', 'project'));
     }
