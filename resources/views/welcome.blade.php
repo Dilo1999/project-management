@@ -16,7 +16,7 @@
             class="w-20 h-20 mx-auto mb-5 rounded-full bg-[#e0e5ec] shadow-neu-inset-sm overflow-hidden bg-cover bg-center"
             style="background-image: url('https://picsum.photos/200');"
         ></div>
-        <h2 class="text-[#333] text-[1.3rem] font-semibold mb-1">Web Development</h2>
+        <h2 class="text-[#333] text-[1.3rem] font-semibold mb-1">Development</h2>
         <p class="text-[0.9rem] text-[#666] mb-6">Made easy!</p>
 
         @if (session('idle_message'))
