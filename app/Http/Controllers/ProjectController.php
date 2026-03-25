@@ -218,19 +218,15 @@ class ProjectController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $users = User::whereIn('role', [User::ROLE_DEVELOPER, User::ROLE_DESIGNER, User::ROLE_SUPER_ADMIN])
-            ->whereNotNull('approved_at')
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
-        return view('add-project', compact('user', 'users'));
+        return view('add-project', compact('user'));
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'assigned_to' => ['required', 'string', 'max:255'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'status' => ['required', Rule::in(Project::STATUS_OPTIONS)],
@@ -238,7 +234,8 @@ class ProjectController extends Controller
         ]);
 
         $project = Project::create([
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
+            'assigned_to' => $user->name,
             ...$validated,
         ]);
 
