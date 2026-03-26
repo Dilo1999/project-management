@@ -41,6 +41,7 @@
                 <div class="bg-white rounded-lg shadow-lg p-8">
                     @php
                         $isCreator = $project->user_id === auth()->id();
+                        $isAssignee = $project->assigned_to === auth()->user()?->name;
                     @endphp
                     <form action="{{ route('projects.update', $project) }}" method="POST" class="space-y-6">
                         @csrf
@@ -122,7 +123,7 @@
                                     Cancel
                                 </a>
                             </div>
-                            @if($isCreator)
+                            @if($isCreator || $isAssignee)
                                 <button type="submit" form="delete-project-form"
                                         class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
                                     Delete Project
@@ -130,7 +131,7 @@
                             @endif
                         </div>
                     </form>
-                    @if($isCreator)
+                    @if($isCreator || $isAssignee)
                         <form id="delete-project-form" action="{{ route('projects.destroy', $project) }}" method="POST" class="hidden"
                               onsubmit="return confirm('Are you sure you want to delete this project?');">
                             @csrf

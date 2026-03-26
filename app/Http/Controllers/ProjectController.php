@@ -389,8 +389,11 @@ class ProjectController extends Controller
 
     public function destroy(Project $project)
     {
-        if ($project->user_id !== Auth::id()) {
-            abort(403);
+        $user = Auth::user();
+        $isCreator = $project->user_id === $user->id;
+        $isAssignee = $project->assigned_to === $user->name;
+        if (!$isCreator && !$isAssignee) {
+            return redirect()->route('home')->with('error', 'You do not have permission to delete this project.');
         }
 
         $project->delete();
