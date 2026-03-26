@@ -39,6 +39,9 @@
                 @endif
 
                 <div class="bg-white rounded-lg shadow-lg p-8">
+                    @php
+                        $isCreator = $project->user_id === auth()->id();
+                    @endphp
                     <form action="{{ route('projects.update', $project) }}" method="POST" class="space-y-6">
                         @csrf
                         @method('PUT')
@@ -119,17 +122,21 @@
                                     Cancel
                                 </a>
                             </div>
-                            <button type="submit" form="delete-project-form"
-                                    class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
-                                Delete Project
-                            </button>
+                            @if($isCreator)
+                                <button type="submit" form="delete-project-form"
+                                        class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                                    Delete Project
+                                </button>
+                            @endif
                         </div>
                     </form>
-                    <form id="delete-project-form" action="{{ route('projects.destroy', $project) }}" method="POST" class="hidden"
-                          onsubmit="return confirm('Are you sure you want to delete this project?');">
-                        @csrf
-                        @method('DELETE')
-                    </form>
+                    @if($isCreator)
+                        <form id="delete-project-form" action="{{ route('projects.destroy', $project) }}" method="POST" class="hidden"
+                              onsubmit="return confirm('Are you sure you want to delete this project?');">
+                            @csrf
+                            @method('DELETE')
+                        </form>
+                    @endif
                 </div>
             </div>
         </main>
